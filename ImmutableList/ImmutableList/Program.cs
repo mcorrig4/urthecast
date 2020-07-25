@@ -27,19 +27,45 @@ namespace ImmList
         //Result List = ['three', 'six', 'one']
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var org = ImmutableList.Create(new string[] { "one", "two", "three" });
+            var add = ImmutableList.Create(new string[] { "one", "two", "five", "six" });
+            var del = ImmutableList.Create(new string[] { "two", "five" });
+            var res = ImmutableList.Create(new string[] { "three", "six", "one" });
+
+            var result = ChangeList(org, add, del);
+
+            if (result.Count != res.Count)
+            {
+                throw new Exception("Lengths don't match!");
+            }
+            for (int i = 0; i < result.Count; i++)
+            {
+                if (result[i] != res[i])
+                {
+                    throw new Exception("The items at position {0} don't match!");
+                }
+            }
         }
 
         private static ImmutableList<string> ChangeList(ImmutableList<string> original, ImmutableList<string> add, ImmutableList<string> remove)
         {
             List <string> temp = new List<string>(original);
 
+            // ADD
             temp.AddRange(add);
-
+            // REMOVE
             var rm = new HashSet<string>(remove);
             temp.RemoveAll(str => rm.Contains(str));
-
+            // SORT
             temp.Sort(CompareItems);
+            // UNIQUE
+            for (int i = temp.Count-2; i >= 0; i--)
+            {
+                if (temp[i+1] == temp[i])
+                {
+                    temp.RemoveAt(i + 1);
+                }
+            }
 
             return ImmutableList.Create(temp.ToArray());
         }
